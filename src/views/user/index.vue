@@ -23,17 +23,17 @@
           {{ scope.row.id + 1 }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="用户名">
+      <el-table-column align="center" label="用户名" width="200">
         <template slot-scope="scope">
           {{ scope.row.name }}
         </template>
       </el-table-column>
-      <el-table-column label="所属租户" align="center">
+      <el-table-column label="所属角色" align="center">
         <template slot-scope="scope">
           <span>{{ scope.row.roleName }}</span>
         </template>
       </el-table-column>
-      <el-table-column align="center" label="邮箱" width="150">
+      <el-table-column align="center" label="邮箱" width="200">
         <template slot-scope="scope">
           {{ scope.row.email }}
         </template>
@@ -88,8 +88,12 @@
         <el-form-item label="邮箱" prop="email">
           <el-input v-model="dataForm.email" auto-complete="off" />
         </el-form-item>
-        <el-form-item label="所属角色" prop="roleName">
-          <el-input v-model="dataForm.roleName" auto-complete="off" />
+        <el-form-item label="所属角色" prop="roleName" @click="select">
+          <el-select v-model="roleNames.label" placeholder="请选择角色">
+            <el-option v-for="item in roleNames" :key="item.value" :value="item.value" :label="item.label">
+              {{ item.label }}
+            </el-option>
+          </el-select>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -119,8 +123,12 @@
         <el-form-item label="邮箱" prop="email">
           <el-input v-model="dataForm.email" auto-complete="off" />
         </el-form-item>
-        <el-form-item label="所属角色" prop="roleName">
-          <el-input v-model="dataForm.roleName" auto-complete="off" />
+        <el-form-item label="所属角色" prop="roleName" @click="select">
+          <el-select v-model="roleNames.label" :placeholder="initRoleName">
+            <el-option v-for="item in roleNames" :key="item.value" :value="item.value" :label="item.label">
+              {{ item.label }}
+            </el-option>
+          </el-select>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -158,8 +166,7 @@
 </template>
 
 <script>
-import { getList } from '@/api/table'
-import { handleEditUser, handleAddUser, handleDeleteUser, handleDeleteUsers } from '@/api/user'
+import { apiGetUsers, apiGetRoles, apiEditUser, apiAddUser, apiDeleteUser, apiDeleteUsers } from '@/api/user'
 import { validateEMail } from '@/utils/validate'
 import md5 from 'js-md5'
 import { parseTime } from '../../utils'
@@ -195,6 +202,7 @@ export default {
           { type: 'string', min: 6, message: '密码不允许小于6位' }
         ]
       },
+      roleNames: [],
       dataForm: {
         name: '',
         password: '',
@@ -212,13 +220,14 @@ export default {
         email: [
           { required: true, message: '邮箱不能为空', trigger: 'blur' },
           { validator: validateEMail }
-        ],
-        roleName: [{ required: true, message: '必填项', trigger: 'blur' }]
+        ]
       },
       editLoading: false,
       currentPage: 1,
       pageSize: 5,
-      passwordInputEnable: true
+      passwordInputEnable: true,
+      tmpUser: '',
+      initRoleName: '请输入角色名'
     }
   },
   created() {
@@ -227,28 +236,28 @@ export default {
   methods: {
     fetchData() {
       this.listLoading = true
-      getList().then(response => {
-        console.log(response.data)
+      apiGetUsers().then(response => {
         this.tableData = response.data
         for (let i = 0, len = response.data.length; i < len; i++) {
           response.data[i].id = i
           this.tableData[i].id = i
           this.tableData[i].updated_at = parseTime(this.tableData[i].updated_at, '{y}-{m}-{d} {h}:{i}:{s}')
         }
-        // this.tableData = [
-        //   {
-        //     name: '1',
-        //     password: '2'
-        //   },
-        //   {
-        //     name: '2',
-        //     password: '3'
-        //   }
-        // ]
+        apiGetRoles().then(response => {
+          response.data.forEach(v => {
+            this.roleNames.push({
+              value: v.name,
+              label: v.name
+            })
+          })
+        })
         this.listLoading = false
       })
     },
-    // 多选框选中数据
+    select(item) {
+      this.dataForm.roleName = item.label
+      console.log(this.dataForm.roleName)
+    },
     handleSelectionChange(selection) {
       this.checkedList = selection.map(item => item.name)
     },
@@ -266,13 +275,16 @@ export default {
       this.dataForm.flag = 1
     },
     handleEdit(val) {
+      console.log(val)
+      this.initRoleName = val.roleName
       this.dataForm.id = val.index
       this.dataForm.name = val.name
-      this.dataForm.rolename = val.rolename
+      this.dataForm.roleName = val.roleName
       this.dataForm.password = val.password
       this.dataForm.email = val.email
       this.dialogEditVisible = true
       this.dataForm.flag = 2
+      this.tmpUser = val.name
     },
     handleEditPassword(val) {
       this.passwordForm.name = val.name
@@ -287,10 +299,10 @@ export default {
       }).then(() => {
         if (data.name) {
           const names = { 'name': data.name }
-          handleDeleteUser(names).then(data != null ? this.reload() : '')
+          apiDeleteUser(names).then(data != null ? this.reload() : '')
         } else {
           const names = this.checkedList
-          handleDeleteUsers(names).then(data != null ? this.reload() : '')
+          apiDeleteUsers(names).then(data != null ? this.reload() : '')
         }
         this.$message({
           type: 'success',
@@ -305,10 +317,11 @@ export default {
           this.$confirm('确认提交吗？', '提示', {}).then(() => {
             this.editLoading = true
             this.dataForm.password = md5(this.dataForm.password)
+            this.dataForm.roleName = this.roleNames.label
             const params = Object.assign({}, this.dataForm)
             if (params.flag === 1) {
               // const datas = { 'name': 'tom', 'password': '123456', 'email': '23322@qq.com', 'rolename': 'user' }
-              handleAddUser(params).then((res) => {
+              apiAddUser(params).then((res) => {
                 console.log(res.code)
                 this.editLoading = false
                 if (res.code === 204) {
@@ -323,9 +336,11 @@ export default {
               })
             }
             if (params.flag === 2) {
-              const name = this.dataForm.name
-              const datas = { 'before': { 'name': name }, 'after': params }
-              handleEditUser(datas).then((res) => {
+              const name = this.tmpUser
+              const role = this.dataForm.roleName
+              this.dataForm.roleName = this.roleNames.label
+              const datas = { 'before': { 'name': name, 'role': role }, 'after': params }
+              apiEditUser(datas).then((res) => {
                 this.editLoading = false
                 if (res.code === 204) {
                   this.$message({ message: '操作成功', type: 'success' })
@@ -350,7 +365,7 @@ export default {
             const params = Object.assign({}, this.passwordForm)
             const name = this.passwordForm.name
             const datas = { 'before': { 'name': name }, 'after': params }
-            handleEditUser(datas).then((res) => {
+            apiEditUser(datas).then((res) => {
               this.editLoading = false
               if (res.code === 204) {
                 this.$message({ message: '操作成功', type: 'success' })
@@ -372,17 +387,6 @@ export default {
     handleCurrentChange(val) {
       this.currentPage = val
     }
-    /* handleDelete:(data)=>{
-      let dog = {
-        name: 'Tom'
-      }
-      let dogs = []
-      dogs.push(dog)
-      console.log(dogs);
-      dogs.splice(dog);
-      console.log(dogs);
-      console.log('dogs.length:' + dogs.length);
-    }*/
   }
 }
 </script>

@@ -1,6 +1,6 @@
 import request from '@/utils/request'
 
-export function login(data) {
+export function apiLogin(data) {
   return request({
     url: '/api/v1/login',
     method: 'post',
@@ -8,68 +8,75 @@ export function login(data) {
   })
 }
 
-export function getInfo(token) {
+export function apiGetUsers(token) {
   return request({
     url: '/api/v1/user/list',
     method: 'get'
   })
 }
-export function handleAddUser(data) {
+export function apiAddUser(data) {
   return request({
     url: '/api/v1/user/add_one',
     method: 'post',
     data
   })
 }
-export function handleDeleteUser(data) {
+export function apiDeleteUser(data) {
   return request({
     url: '/api/v1/user/del_one',
     method: 'post',
     data
   })
 }
-export function handleDeleteUsers(data) {
+export function apiDeleteUsers(data) {
   return request({
     url: '/api/v1/user/del_many',
     method: 'post',
     data
   })
 }
-export function handleEditUser(data) {
+export function apiEditUser(data) {
   return request({
     url: '/api/v1/user/update_one',
     method: 'post',
     data
   })
 }
-export function getRole(token) {
+export function apiGetRoles(token) {
   return request({
     url: '/api/v1/role/list',
     method: 'get'
   })
 }
-export function handleAddRole(data) {
+export function apiAddRole(data) {
   return request({
     url: '/api/v1/role/add_one',
     method: 'post',
     data
   })
 }
-export function handleDeleteRole(data) {
+export function apiDeleteRole(data) {
   return request({
     url: '/api/v1/role/del_one',
     method: 'post',
     data
   })
 }
-export function handleEditRole(data) {
+export function apiDeleteRoles(data) {
+  return request({
+    url: '/api/v1/role/del_many',
+    method: 'post',
+    data
+  })
+}
+export function apiEditRole(data) {
   return request({
     url: '/api/v1/role/update_one',
     method: 'post',
     data
   })
 }
-export function logout() {
+export function apiLogout() {
   return request({
     url: '/api/v1/user/logout',
     method: 'post'

@@ -36,16 +36,16 @@ module.exports = {
       warnings: false,
       errors: true
     },
-	before: require('./mock/mock-server.js'),
-	// proxy: {
-	//   	'/api': {
-	//   	target: 'http://iamasd.mynatapp.cc',
-	//   	changeOrigin: true,
-	// 	pathRewrite: {
-	// 	     ['^/api' ]: '/api' // 将'/api' 重写为''
-	// 		}
-	// 	}
-	//  }
+    before: require('./mock/mock-server.js')
+    // proxy: {
+    //   	'/api': {
+    //   	target: 'http://iamasd.mynatapp.cc',
+    //   	changeOrigin: true,
+    // 	pathRewrite: {
+    // 	     ['^/api' ]: '/api' // 将'/api' 重写为''
+    // 		}
+    // 	}
+    //  }
   },
   configureWebpack: {
     // provide the app's title in webpack's name field, so that
