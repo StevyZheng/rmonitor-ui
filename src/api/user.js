@@ -8,6 +8,13 @@ export function apiLogin(data) {
   })
 }
 
+export function apiGetUserFromToken(token) {
+  return request({
+    url: '/api/v1/user/find_name',
+    method: 'get'
+  })
+}
+
 export function apiGetUsers(token) {
   return request({
     url: '/api/v1/user/list',

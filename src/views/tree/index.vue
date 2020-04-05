@@ -276,17 +276,6 @@ export default {
     handleCurrentChange(val) {
       this.currentPage = val
     }
-    /* handleDelete:(data)=>{
-      let dog = {
-        name: 'Tom'
-      }
-      let dogs = []
-      dogs.push(dog)
-      console.log(dogs);
-      dogs.splice(dog);
-      console.log(dogs);
-      console.log('dogs.length:' + dogs.length);
-    }*/
   }
 }
 </script>

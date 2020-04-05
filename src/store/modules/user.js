@@ -1,6 +1,7 @@
-import { apiLogin, apiLogout, apiGetUsers } from '@/api/user'
+import { apiLogin, apiLogout, apiGetUserFromToken } from '@/api/user'
 import { getToken, setToken, removeToken } from '@/utils/auth'
 import { resetRouter } from '@/router'
+// import da from 'element-ui/src/locale/lang/da'
 
 const getDefaultState = () => {
   return {
@@ -46,15 +47,12 @@ const actions = {
   // get user info
   getInfo({ commit, state }) {
     return new Promise((resolve, reject) => {
-      apiGetUsers(state.token).then(response => {
+      apiGetUserFromToken(state.token).then(response => {
         const { data } = response
-
         if (!data) {
           reject('Verification failed, please Login again.')
         }
-
-        const { name, avatar } = data
-
+        const { name, avatar } = { name: data, avatar: '' }
         commit('SET_NAME', name)
         commit('SET_AVATAR', avatar)
         resolve(data)

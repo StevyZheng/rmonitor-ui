@@ -21,3 +21,17 @@ export function apiAddHostGroup(data) {
     data
   })
 }
+export function apiAddHost(data) {
+  return request({
+    url: '/api/v1/host/add_one',
+    method: 'post',
+    data
+  })
+}
+export function apiDelHost(data) {
+  return request({
+    url: '/api/v1/host/del_one',
+    method: 'post',
+    data
+  })
+}
